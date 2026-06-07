@@ -1,0 +1,819 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gamify Life — Your Daily Journal</title>
+  <meta name="description" content="A warm, gamified daily journal that grows a living garden as you complete your quests and build discipline." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Crimson+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Space+Mono:wght@400;700&family=Caveat:wght@400;600&family=Playpen+Sans:wght@400;500&display=swap" rel="stylesheet" />
+
+  <!-- Modular CSS -->
+  <link rel="stylesheet" href="static/css/base.css" />
+  <link rel="stylesheet" href="static/css/layout.css" />
+  <link rel="stylesheet" href="static/css/components.css" />
+  <link rel="stylesheet" href="static/css/garden.css" />
+  <link rel="stylesheet" href="static/css/animations.css" />
+</head>
+<body>
+
+  <!-- ═══════════════ LOADING SCREEN ═══════════════ -->
+  <div class="loading-screen" id="loading-screen">
+    <div class="loading-animation-container">
+      <svg class="loading-sun-svg" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="16" fill="var(--accent)" />
+      </svg>
+      <svg class="loading-tree-svg" viewBox="0 0 100 120">
+        <!-- Pot/ground -->
+        <path d="M30 110 L70 110 L65 118 L35 118 Z" fill="#2C2824" stroke="var(--border)" stroke-width="2"/>
+        <!-- Main growing stem -->
+        <path id="loading-stem" d="M50 110 C50 85, 50 65, 50 25" fill="none" stroke="#7CB342" stroke-width="5" stroke-linecap="round" />
+        <!-- Glowing leaves growing -->
+        <path id="loading-leaf-l" d="M50 80 C32 72, 28 58, 46 54 C48 64, 48 72, 50 80" fill="#7CB342" />
+        <path id="loading-leaf-r" d="M50 60 C68 52, 72 38, 54 34 C52 44, 52 52, 50 60" fill="#7CB342" />
+        <!-- Bloom -->
+        <circle id="loading-flower" cx="50" cy="25" r="9" fill="var(--accent)" />
+      </svg>
+    </div>
+    <div class="loading-title">Cultivating Gamify Life</div>
+    <div class="loading-sub">Sowing seeds of discipline...</div>
+  </div>
+
+  <!-- ═══════════════ LEVEL UP MODAL ═══════════════ -->
+  <div class="overlay" id="level-modal">
+    <div class="modal-card">
+      <div class="modal-icon">🎉</div>
+      <h2 class="modal-title">Level Up!</h2>
+      <p class="modal-text">You've reached Level <strong id="modal-new-level">2</strong>. Your garden is blooming beautifully.</p>
+      <button class="btn-primary" onclick="closeModal()">Keep growing</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════ PROFILE MODAL ═══════════════ -->
+  <div class="overlay" id="profile-modal">
+    <div class="modal-card profile-modal-card">
+      <div class="modal-icon">👤</div>
+      <h2 class="modal-title">Your Profile</h2>
+      <form id="profile-form" onsubmit="saveProfile(event)">
+        <div class="form-field">
+          <label for="profile-name">Name</label>
+          <input type="text" id="profile-name" name="name" class="form-input" required />
+        </div>
+        <div class="form-row">
+          <div class="form-field">
+            <label for="profile-age">Age</label>
+            <input type="number" id="profile-age" name="age" class="form-input" placeholder="e.g. 25" />
+          </div>
+          <div class="form-field">
+            <label for="profile-birthdate">Birthdate</label>
+            <input type="date" id="profile-birthdate" name="birthdate" class="form-input" />
+          </div>
+        </div>
+        <div class="form-field">
+          <label for="profile-focus">Focus Level Goal</label>
+          <select id="profile-focus" name="focus_level" class="form-input">
+            <option value="Needs Realignment">Needs Realignment</option>
+            <option value="Moderate">Moderate / Balanced</option>
+            <option value="Laser Focused">Laser Focused</option>
+          </select>
+        </div>
+        
+        <!-- Focus suggestion box based on tracker data -->
+        <div class="focus-suggestion-box">
+          <div class="suggestion-header-row">
+            <span class="suggestion-title">💡 Focus Suggestion</span>
+            <span class="suggestion-badge" id="suggested-focus-badge">Moderate</span>
+          </div>
+          <div class="suggestion-reason" id="suggested-focus-reason">Log some routine activities to get a suggestion.</div>
+          <button type="button" class="btn-activate-suggestion" onclick="applySuggestedFocus()">Apply Suggestion</button>
+        </div>
+
+        <div style="display: flex; gap: 12px; margin-top: 24px;">
+          <button type="button" class="btn-secondary" onclick="closeProfileModal()">Cancel</button>
+          <button type="submit" class="btn-primary" style="flex: 1;">Save Profile</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══════════════ SETTINGS MODAL ═══════════════ -->
+  <div class="overlay" id="settings-modal">
+    <div class="modal-card">
+      <div class="modal-icon">⚙️</div>
+      <h2 class="modal-title">AI Settings</h2>
+      <form id="settings-form" onsubmit="saveSettings(event)">
+        <div class="form-field">
+          <label for="settings-key">NVIDIA API Key</label>
+          <input type="password" id="settings-key" class="form-input" placeholder="Paste your nvapi-..." />
+          <p style="font-size: 0.68rem; color: var(--text-muted); margin-top: 4px; text-align: left;">
+            Your key is saved locally in your browser and never sent to any server. Leave blank to run offline.
+          </p>
+        </div>
+        <div class="form-field">
+          <label for="settings-model">Model Name</label>
+          <input type="text" id="settings-model" class="form-input" value="z-ai/glm-5.1" />
+        </div>
+        <div class="form-field">
+          <label for="settings-url">API Base URL</label>
+          <input type="text" id="settings-url" class="form-input" value="https://integrate.api.nvidia.com/v1" />
+        </div>
+        <div style="display: flex; gap: 12px; margin-top: 24px;">
+          <button type="button" class="btn-secondary" onclick="closeSettingsModal()">Cancel</button>
+          <button type="submit" class="btn-primary" style="flex: 1;">Save Settings</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══════════════ TOP BAR ═══════════════ -->
+  <div class="top-bar">
+    <div class="ambient-time">
+      <span class="time-dot"></span>
+      <span id="ambient-clock">--:--</span>
+      <span id="ambient-date" class="ambient-date"></span>
+    </div>
+    <div class="top-actions">
+      <button class="top-btn" title="AI Settings" onclick="openSettingsModal()">⚙️</button>
+      <button class="top-btn" title="Profile" onclick="openProfileModal()">👤</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════ MAIN CONTENT ═══════════════ -->
+  <div class="app-shell">
+    <div class="main-scroll">
+
+      <!-- Flash Messages Container -->
+      <div id="flash-container" class="flash-stack" style="display: none;"></div>
+
+      <!-- ══════════ TAB: HOME ══════════ -->
+      <div class="tab-panel" id="tab-home">
+
+        <!-- 🌅 Morning Greeting -->
+        <section class="greeting-section">
+          <div class="greeting-label" id="greeting-label">Good morning</div>
+          <h1 class="greeting-title">
+            <span id="greeting-text-prefix">Good morning</span>, <span class="accent-name" id="display-profile-name">Explorer</span>
+            <span id="greeting-icon">🌅</span>
+          </h1>
+          <p class="daily-quote" id="daily-slogan">"Focus on the process, not the outcome. Consistency wins."</p>
+
+          <div class="intention-box">
+            <span class="intention-icon">🎯</span>
+            <input type="text" class="intention-input" placeholder="What's your intention for today?" id="intention-input" />
+          </div>
+
+          <div class="quick-stats">
+            <div class="stat-pill accent-pill">
+              <span class="pill-icon">🔥</span>
+              <span class="pill-value" id="hud-streak">0</span>
+              <span class="pill-label">streak</span>
+            </div>
+            <div class="stat-pill">
+              <span class="pill-icon">⭐</span>
+              <span class="pill-value">Lv.<span id="hud-level">1</span></span>
+              <span class="pill-label">level</span>
+            </div>
+            <div class="stat-pill">
+              <span class="pill-icon">🌱</span>
+              <span class="pill-value"><span id="hud-xp-text">0</span>/100</span>
+              <span class="pill-label">xp</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- 🌱 Living Garden -->
+        <section class="garden-section">
+          <canvas class="garden-canvas" id="garden-canvas"></canvas>
+          <div class="garden-overlay">
+            <div class="garden-status">
+              <div class="garden-stage">Garden Stage</div>
+              <div class="garden-progress-text" id="garden-text">Loading garden…</div>
+              <div class="garden-progress-bar">
+                <div class="garden-progress-fill" id="garden-fill" style="width: 0%"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 📝 Quest Cards -->
+        <section class="quests-section">
+          <div class="section-header">
+            <h2 class="section-title">Today's Quests</h2>
+            <span class="section-meta" id="quest-count">0/0</span>
+          </div>
+          <div id="quest-list"></div>
+        </section>
+
+        <!-- 🍩 Time Ring -->
+        <section class="time-section">
+          <div class="section-header">
+            <h2 class="section-title">How did you spend today?</h2>
+          </div>
+          <div class="time-ring-container">
+            <svg class="time-ring-svg" viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="40" fill="none" stroke="var(--border)" stroke-width="8" />
+              <circle cx="50" cy="50" r="40" fill="none" stroke="var(--success)" stroke-width="8"
+                stroke-dasharray="0 252" stroke-dashoffset="0" stroke-linecap="round"
+                transform="rotate(-90 50 50)" id="ring-productive" />
+              <circle cx="50" cy="50" r="40" fill="none" stroke="var(--neutral-gray)" stroke-width="8"
+                stroke-dasharray="0 252" stroke-dashoffset="0" stroke-linecap="round"
+                transform="rotate(-90 50 50)" id="ring-neutral" />
+              <circle cx="50" cy="50" r="40" fill="none" stroke="var(--error)" stroke-width="8"
+                stroke-dasharray="0 252" stroke-dashoffset="0" stroke-linecap="round"
+                transform="rotate(-90 50 50)" id="ring-unproductive" />
+              <circle cx="50" cy="50" r="40" fill="none" stroke="var(--accent)" stroke-width="8"
+                stroke-dasharray="0 252" stroke-dashoffset="0" stroke-linecap="round"
+                transform="rotate(-90 50 50)" id="ring-free" />
+              <text x="50" y="47" text-anchor="middle" font-size="11" fill="var(--text-muted)">⏳</text>
+              <text x="50" y="58" text-anchor="middle" font-size="5.5" fill="var(--text-muted)" font-family="var(--font-mono)">24h</text>
+            </svg>
+            <div class="time-legend">
+              <div class="time-legend-item">
+                <div class="legend-dot" style="background: var(--success)"></div>
+                <div class="legend-info">
+                  <span class="legend-label">Productive</span>
+                  <span class="legend-time">0.0h</span>
+                </div>
+              </div>
+              <div class="time-legend-item">
+                <div class="legend-dot" style="background: var(--error)"></div>
+                <div class="legend-info">
+                  <span class="legend-label">Wasted</span>
+                  <span class="legend-time">0.0h</span>
+                </div>
+              </div>
+              <div class="time-legend-item">
+                <div class="legend-dot" style="background: var(--neutral-gray)"></div>
+                <div class="legend-info">
+                  <span class="legend-label">Neutral</span>
+                  <span class="legend-time">0.0h</span>
+                </div>
+              </div>
+              <div class="time-legend-item">
+                <div class="legend-dot" style="background: var(--accent)"></div>
+                <div class="legend-info">
+                  <span class="legend-label">Free Time</span>
+                  <span class="legend-time">24.0h</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+
+
+      <!-- ══════════ TAB: GOALS ══════════ -->
+      <div class="tab-panel" id="tab-goals">
+
+        <section>
+          <div class="section-header">
+            <h2 class="section-title">Initiate New Campaign</h2>
+          </div>
+
+          <form id="goal-form" onsubmit="handleGoalFormSubmit(event)">
+            <div class="form-field">
+              <label for="goal">Goal Description</label>
+              <input id="goal" name="goal" type="text" class="form-input" placeholder="e.g. Run 10km under 50 mins" required />
+            </div>
+            <div class="form-field">
+              <label for="current_level">Current Starting Level</label>
+              <textarea id="current_level" name="current_level" class="form-input" rows="2" placeholder="e.g. Can run 5km in 30 mins"></textarea>
+            </div>
+            <div class="form-row">
+              <div class="form-field">
+                <label for="deadline">Target Deadline</label>
+                <input id="deadline" name="deadline" type="text" class="form-input" placeholder="e.g. 45 days" />
+              </div>
+              <div class="form-field">
+                <label for="available_time">Available Hours</label>
+                <input id="available_time" name="available_time" type="text" class="form-input" placeholder="e.g. 1 hour daily" />
+              </div>
+            </div>
+            <button type="submit" class="btn-primary">Generate Probability Plan</button>
+          </form>
+        </section>
+
+        <section>
+          <div class="section-header">
+            <h2 class="section-title">Campaign Log Book</h2>
+          </div>
+          <div id="goal-log-book"></div>
+        </section>
+      </div>
+
+
+      <!-- ══════════ TAB: ROUTINE ══════════ -->
+      <div class="tab-panel" id="tab-routine">
+
+        <section>
+          <div class="section-header">
+            <h2 class="section-title">Log Daily Activity</h2>
+          </div>
+
+          <form id="activity-form" onsubmit="handleActivityFormSubmit(event)">
+            <div class="form-field">
+              <label for="act-name">Activity Title</label>
+              <input id="act-name" name="name" type="text" class="form-input" placeholder="e.g. Gym, Study, Social Media" required />
+            </div>
+            <div class="form-row">
+              <div class="form-field">
+                <label for="act-duration">Hours Spent</label>
+                <input id="act-duration" name="duration" type="number" step="0.5" min="0.5" max="24" class="form-input" placeholder="e.g. 2" required />
+              </div>
+              <div class="form-field">
+                <label for="act-type">Type</label>
+                <select id="act-type" name="type" class="form-input" required>
+                  <option value="productive">Productive</option>
+                  <option value="neutral">Neutral</option>
+                  <option value="unproductive">Unproductive</option>
+                </select>
+              </div>
+            </div>
+            <button type="submit" class="btn-secondary">Add to Tracker</button>
+          </form>
+        </section>
+
+        <section>
+          <div class="section-header">
+            <h2 class="section-title">Schedule Map</h2>
+            <span class="section-meta">0.0h logged</span>
+          </div>
+          <div id="routine-list"></div>
+        </section>
+      </div>
+
+
+      <!-- ══════════ TAB: REVIEW ══════════ -->
+      <div class="tab-panel" id="tab-review">
+
+        <!-- 🌙 Evening Review -->
+        <section class="evening-section" style="margin-bottom: var(--space-lg);">
+          <div class="evening-icon">🌙</div>
+          <h2 class="evening-title">Evening wind-down</h2>
+          <ul class="evening-summary" id="review-summary-list">
+            <li>🌱 Your garden is growing based on your quests.</li>
+            <li>🔥 You kept a streak alive.</li>
+            <li>⏳ Track and log your hours daily.</li>
+          </ul>
+
+          <form id="review-form">
+            <div style="margin-bottom: var(--space-sm);">
+              <label style="font-family: var(--font-mono); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--text-muted); display: block; margin-bottom: 8px; text-align: left;">Discipline Rating</label>
+              <input type="hidden" name="rating" id="review-rating-input" value="5" />
+              <div class="star-row">
+                <button type="button" class="star-btn selected" data-value="1">★</button>
+                <button type="button" class="star-btn selected" data-value="2">★</button>
+                <button type="button" class="star-btn selected" data-value="3">★</button>
+                <button type="button" class="star-btn selected" data-value="4">★</button>
+                <button type="button" class="star-btn selected" data-value="5">★</button>
+              </div>
+            </div>
+            <input type="text" name="notes" class="evening-input" placeholder="One thing to carry into tomorrow…" required />
+            <button type="submit" class="btn-primary">Close the journal & claim +15 XP →</button>
+          </form>
+        </section>
+
+        <!-- Past reflections -->
+        <section>
+          <div class="section-header">
+            <h2 class="section-title">Past Reflections</h2>
+          </div>
+          <div id="past-reflections-list"></div>
+        </section>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ═══════════════ BOTTOM DOCK ═══════════════ -->
+  <nav class="bottom-dock">
+    <button class="dock-item active" data-tab="home">
+      <span class="dock-icon">🏠</span>
+      <span class="dock-label">Home</span>
+    </button>
+    <button class="dock-item" data-tab="goals">
+      <span class="dock-icon">🎯</span>
+      <span class="dock-label">Goals</span>
+    </button>
+    <button class="dock-item" data-tab="routine">
+      <span class="dock-icon">⏱️</span>
+      <span class="dock-label">Routine</span>
+    </button>
+    <button class="dock-item" data-tab="review">
+      <span class="dock-icon">🌙</span>
+      <span class="dock-label">Review</span>
+    </button>
+  </nav>
+
+
+  <!-- ═══════════════ CHAT FAB ═══════════════ -->
+  <button class="chat-fab" id="chat-fab">💬</button>
+
+  <!-- ═══════════════ CHAT DRAWER ═══════════════ -->
+  <div class="chat-drawer" id="chat-drawer">
+    <div class="chat-header">
+      <div class="chat-header-left">
+        <span class="chat-header-icon">✨</span>
+        <div>
+          <div class="chat-header-title">Your Coach</div>
+          <div class="chat-header-sub">Always here to help</div>
+        </div>
+      </div>
+      <button class="chat-close" id="chat-close">✕</button>
+    </div>
+    <div class="chat-body" id="chat-body"></div>
+    <div class="chat-footer">
+      <input type="text" class="chat-input" id="chat-input" placeholder="Ask me anything…" />
+      <button class="chat-send" id="chat-send">→</button>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════ CLIENT DB AND GENERATORS ═══════════════ -->
+  <script src="static/js/db.js"></script>
+  <script src="static/js/goal-generator.js"></script>
+
+  <!-- ═══════════════ MODULAR JS ═══════════════ -->
+  <script src="static/js/clock.js"></script>
+  <script src="static/js/garden.js"></script>
+  <script src="static/js/quests.js"></script>
+  <script src="static/js/time-ring.js"></script>
+  <script src="static/js/evening.js"></script>
+  <script src="static/js/chat.js"></script>
+  <script src="static/js/navigation.js"></script>
+  <script src="static/js/profile.js"></script>
+
+  <!-- ═══════════════ DYNAMIC BRIDGE INITIALIZER ═══════════════ -->
+  <script>
+    // Seeding dynamic data bridge on load
+    (function() {
+      // Set daily motivational quotes
+      const MOTIVATIONAL_SLOGANS = [
+        "Focus on the process, not the outcome. Consistency wins.",
+        "You don't need motivation, you need discipline.",
+        "Every action you take is a vote for the person you want to become.",
+        "Discipline compounds. 1% better every single day.",
+        "The pain of discipline is temporary; the pain of regret is permanent.",
+        "Subtract the noise. Focus on the high-leverage bottlenecks.",
+        "Consistency beats talent. Show up every day.",
+        "Your daily routine is your actual priority. Expose the leaks."
+      ];
+      const sloganEl = document.getElementById('daily-slogan');
+      if (sloganEl) {
+        const idx = Math.floor(Math.random() * MOTIVATIONAL_SLOGANS.length);
+        sloganEl.textContent = `"${MOTIVATIONAL_SLOGANS[idx]}"`;
+      }
+
+      // Sync user profile values on loading review summary
+      function updateReviewSummaryText() {
+        const profile = window.db.getProfile();
+        const activities = window.db.getActivities();
+        const totalHours = activities.reduce((sum, a) => sum + parseFloat(a.duration_hours), 0);
+        
+        const summary = document.getElementById('review-summary-list');
+        if (summary) {
+          summary.innerHTML = `
+            <li>🌱 Your garden is growing based on your quests.</li>
+            <li>🔥 You kept a ${profile.streak}-day streak alive.</li>
+            <li>⏳ You logged ${totalHours.toFixed(1)} hours today.</li>
+          `;
+        }
+      }
+
+      // Intercept and handle forms locally
+      window.handleGoalFormSubmit = function(e) {
+        e.preventDefault();
+        const goal = document.getElementById('goal').value.trim();
+        const currentLevel = document.getElementById('current_level').value.trim();
+        const deadline = document.getElementById('deadline').value.trim();
+        const availableTime = document.getElementById('available_time').value.trim();
+
+        if (!goal) return;
+
+        showGoalLoader();
+
+        setTimeout(async () => {
+          try {
+            const result = await window.goalGenerator.generateGoalPlan(goal, currentLevel, deadline, availableTime);
+            window.db.saveGoal(
+              result.goal,
+              result.current_level,
+              result.deadline,
+              result.available_time,
+              result.plan,
+              result.probability,
+              result.focus_score,
+              result.rationale
+            );
+
+            // Re-render UI
+            window.renderQuests();
+            window.updateHudStats();
+            renderGoalLogBook();
+            showFlashMessage("Campaign successfully initiated!", "success");
+
+            // Hide loader
+            const loader = document.getElementById('loading-screen');
+            if (loader) loader.classList.add('fade-out');
+
+            // Reset fields
+            document.getElementById('goal').value = '';
+            document.getElementById('current_level').value = '';
+            document.getElementById('deadline').value = '';
+            document.getElementById('available_time').value = '';
+
+            // Redirect tab to home
+            const homeBtn = document.querySelector('.dock-item[data-tab="home"]');
+            if (homeBtn) homeBtn.click();
+          } catch(err) {
+            console.error(err);
+            alert("Generation failed: " + err.message);
+            const loader = document.getElementById('loading-screen');
+            if (loader) loader.classList.add('fade-out');
+          }
+        }, 800);
+      };
+
+      window.handleActivityFormSubmit = function(e) {
+        e.preventDefault();
+        const name = document.getElementById('act-name').value.trim();
+        const duration = document.getElementById('act-duration').value.trim();
+        const type = document.getElementById('act-type').value.trim();
+
+        if (!name || !duration || !type) return;
+
+        const res = window.db.addActivity(name, duration, type);
+        if (res.success) {
+          document.getElementById('act-name').value = '';
+          document.getElementById('act-duration').value = '';
+          
+          renderRoutineList();
+          window.renderTimeRing();
+          showFlashMessage("Daily activity logged successfully.", "success");
+        } else {
+          alert(res.error);
+        }
+      };
+
+      // Settings Modal Handlers
+      window.openSettingsModal = function() {
+        document.getElementById('settings-modal').classList.add('active');
+        document.getElementById('settings-key').value = localStorage.getItem('gl_api_key') || '';
+        document.getElementById('settings-model').value = localStorage.getItem('gl_api_model') || 'z-ai/glm-5.1';
+        document.getElementById('settings-url').value = localStorage.getItem('gl_api_base_url') || 'https://integrate.api.nvidia.com/v1';
+      };
+
+      window.closeSettingsModal = function() {
+        document.getElementById('settings-modal').classList.remove('active');
+      };
+
+      window.saveSettings = function(e) {
+        e.preventDefault();
+        const key = document.getElementById('settings-key').value.trim();
+        const model = document.getElementById('settings-model').value.trim();
+        const url = document.getElementById('settings-url').value.trim();
+
+        if (key) {
+          localStorage.setItem('gl_api_key', key);
+        } else {
+          localStorage.removeItem('gl_api_key');
+        }
+        localStorage.setItem('gl_api_model', model);
+        localStorage.setItem('gl_api_base_url', url);
+
+        closeSettingsModal();
+        showFlashMessage("AI settings saved successfully!", "success");
+      };
+
+      // Flash Message Helper
+      function showFlashMessage(text, category) {
+        const container = document.getElementById('flash-container');
+        if (!container) return;
+
+        container.innerHTML = `<div class="flash-message ${category}">${text}</div>`;
+        container.style.display = 'block';
+
+        setTimeout(() => {
+          container.style.opacity = '0';
+          setTimeout(() => {
+            container.style.display = 'none';
+            container.style.opacity = '1';
+          }, 600);
+        }, 3000);
+      }
+
+      function showGoalLoader() {
+        const loader = document.getElementById('loading-screen');
+        if (loader) {
+          const title = loader.querySelector('.loading-title');
+          const subtitle = loader.querySelector('.loading-sub');
+          if (title) title.textContent = 'Initiating New Campaign...';
+          if (subtitle) subtitle.textContent = 'Analyzing daily routine leaks & compiling priority quests...';
+          
+          // Reset SVG stem, leaf and flower animations
+          const stem = document.getElementById('loading-stem');
+          if (stem) {
+            stem.style.animation = 'none';
+            void stem.offsetHeight;
+            stem.style.animation = 'stem-grow 2.2s cubic-bezier(0.4, 0, 0.2, 1) 0.6s forwards';
+          }
+          const leafL = document.getElementById('loading-leaf-l');
+          if (leafL) {
+            leafL.style.animation = 'none';
+            void leafL.offsetHeight;
+            leafL.style.animation = 'leaf-grow 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 1.5s forwards';
+          }
+          const leafR = document.getElementById('loading-leaf-r');
+          if (leafR) {
+            leafR.style.animation = 'none';
+            void leafR.offsetHeight;
+            leafR.style.animation = 'leaf-grow 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 1.9s forwards';
+          }
+          const flower = document.getElementById('loading-flower');
+          if (flower) {
+            flower.style.animation = 'none';
+            void flower.offsetHeight;
+            flower.style.animation = 'leaf-grow 1s cubic-bezier(0.34, 1.56, 0.64, 1) 2.3s forwards';
+          }
+          
+          loader.classList.remove('fade-out');
+        }
+      }
+
+      function escapeHtml(str) {
+        if (!str) return '';
+        return str
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;');
+      }
+
+      function renderGoalLogBook() {
+        const logBook = document.getElementById('goal-log-book');
+        if (!logBook) return;
+
+        const goals = window.db.getGoals();
+        const headerMeta = document.querySelector('#tab-goals .section-header .section-meta');
+        if (headerMeta) {
+          headerMeta.textContent = `${goals.length} campaign${goals.length === 1 ? '' : 's'}`;
+        }
+
+        if (goals.length === 0) {
+          logBook.innerHTML = `
+            <div class="goal-card" style="text-align: center; color: var(--text-muted);">
+              No campaigns yet. Create your first goal above!
+            </div>
+          `;
+          return;
+        }
+
+        logBook.innerHTML = goals.map(g => `
+          <div class="goal-card ${g.is_active === 1 ? 'is-active' : ''}">
+            <div class="goal-card-header">
+              <div class="goal-card-title">${escapeHtml(g.goal_text)}</div>
+              <div class="goal-card-prob">${g.current_probability}</div>
+            </div>
+            <div class="goal-card-meta">
+              <span class="quest-tag">Baseline: ${g.base_probability}</span>
+              <span class="quest-tag">Focus: ${g.focus_score}</span>
+              ${g.is_active === 1 ? '<span class="quest-tag xp-tag">Active</span>' : ''}
+            </div>
+            <div class="goal-card-actions">
+              <button class="${g.is_active === 1 ? 'btn-deactivate' : 'btn-activate'}" onclick="window.toggleGoalActive(${g.id})">
+                ${g.is_active === 1 ? 'Deactivate' : 'Activate'}
+              </button>
+              <button class="btn-danger" onclick="window.deleteGoalCampaign(${g.id})">Delete</button>
+            </div>
+          </div>
+        `).join('');
+      }
+      window.renderGoalLogBook = renderGoalLogBook;
+
+      window.toggleGoalActive = function(goalId) {
+        const res = window.db.activateGoal(goalId);
+        if (res.success) {
+          renderGoalLogBook();
+          window.renderQuests();
+          window.updateHudStats();
+        }
+      };
+
+      window.deleteGoalCampaign = function(goalId) {
+        if (confirm("Delete this campaign and all quests?")) {
+          const res = window.db.deleteGoal(goalId);
+          if (res.success) {
+            renderGoalLogBook();
+            window.renderQuests();
+            window.updateHudStats();
+          }
+        }
+      };
+
+      function renderRoutineList() {
+        const routineList = document.getElementById('routine-list');
+        if (!routineList) return;
+
+        const activities = window.db.getActivities();
+        const totalLogged = activities.reduce((sum, a) => sum + parseFloat(a.duration_hours), 0);
+        
+        const headerMeta = document.querySelector('#tab-routine .section-header .section-meta');
+        if (headerMeta) {
+          headerMeta.textContent = `${totalLogged.toFixed(1)}h logged`;
+        }
+
+        if (activities.length === 0) {
+          routineList.innerHTML = `
+            <div class="quest-card" style="cursor: default; text-align: center; color: var(--text-muted);">
+              No activities logged yet. Start tracking above!
+            </div>
+          `;
+          return;
+        }
+
+        routineList.innerHTML = activities.map(a => `
+          <div class="quest-card" style="cursor: default;">
+            <div class="quest-content">
+              <div class="quest-title">${escapeHtml(a.name)}</div>
+              <div class="quest-meta">
+                <span class="quest-tag ${a.type === 'productive' ? 'xp-tag' : a.type === 'unproductive' ? 'prob-tag' : ''}" style="${a.type === 'unproductive' ? 'color: var(--error); border-color: rgba(229,115,115,.2);' : ''}">
+                  ${a.duration_hours}h · ${a.type.charAt(0).toUpperCase() + a.type.slice(1)}
+                </span>
+              </div>
+            </div>
+            <div class="quest-reward">
+              <button class="btn-danger" style="padding: 4px 8px; border: none; background: transparent; cursor: pointer; font-size: 1.1rem; line-height: 1;" onclick="window.deleteRoutineActivity(${a.id})">×</button>
+            </div>
+          </div>
+        `).join('');
+      }
+      window.renderRoutineList = renderRoutineList;
+
+      window.deleteRoutineActivity = function(activityId) {
+        const res = window.db.deleteActivity(activityId);
+        if (res.success) {
+          renderRoutineList();
+          window.renderTimeRing();
+        }
+      };
+
+      function renderReflections() {
+        const reflectionsList = document.getElementById('past-reflections-list');
+        if (!reflectionsList) return;
+
+        const reviews = window.db.getReviews();
+        if (reviews.length === 0) {
+          reflectionsList.innerHTML = `
+            <div class="review-card" style="text-align: center; color: var(--text-muted);">
+              No reflections yet. Complete your first evening review above.
+            </div>
+          `;
+          return;
+        }
+
+        reflectionsList.innerHTML = reviews.map(r => {
+          const rating = parseInt(r.rating) || 5;
+          const starsHtml = '★'.repeat(rating) + '☆'.repeat(5 - rating);
+          return `
+            <div class="review-card">
+              <div class="review-card-header">
+                <div class="review-stars">${starsHtml}</div>
+                <div class="review-date">${escapeHtml(r.created_at)}</div>
+              </div>
+              <p class="review-notes">"${escapeHtml(r.notes || 'No reflection notes.')}"</p>
+            </div>
+          `;
+        }).join('');
+      }
+      window.renderReflections = renderReflections;
+
+      // Initial loads
+      renderGoalLogBook();
+      renderRoutineList();
+      renderReflections();
+      updateReviewSummaryText();
+
+      // Bind tab changes to reflections update
+      const dockItems = document.querySelectorAll('.dock-item');
+      dockItems.forEach(d => {
+        d.addEventListener('click', () => {
+          const tab = d.getAttribute('data-tab');
+          if (tab === 'review') {
+            updateReviewSummaryText();
+            renderReflections();
+          } else if (tab === 'goals') {
+            renderGoalLogBook();
+          } else if (tab === 'routine') {
+            renderRoutineList();
+          }
+        });
+      });
+    })();
+  </script>
+
+</body>
+</html>
