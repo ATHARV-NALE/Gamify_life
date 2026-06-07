@@ -1,0 +1,157 @@
+/* ==========================================================================
+   GAMIFY LIFE — BASE
+   Design Tokens · Reset · Typography · Texture
+   ========================================================================== */
+
+:root {
+  color-scheme: dark;
+
+  /* ── Warm Earth Palette ── */
+  --bg-app: #1A1714;
+  --bg-sidebar: #141210;
+  --surface-card: #24201C;
+  --surface-inner: #1C1916;
+  --surface-hover: #2C2824;
+  --surface-glass: rgba(36, 32, 28, 0.82);
+
+  /* ── Structural ── */
+  --border: #2E2924;
+  --border-focus: #3D3730;
+  --border-light: #1A1714;
+
+  /* ── Accent — Honey Gold ── */
+  --accent: #D4A853;
+  --accent-muted: #B8923A;
+  --accent-transparent: rgba(212, 168, 83, 0.06);
+  --accent-border: rgba(212, 168, 83, 0.18);
+  --accent-glow: rgba(212, 168, 83, 0.12);
+
+  /* ── Semantics ── */
+  --success: #7CB342;
+  --success-soft: rgba(124, 179, 66, 0.1);
+  --error: #E57373;
+  --error-soft: rgba(229, 115, 115, 0.1);
+  --neutral-gray: #8D857E;
+
+  /* ── Typography Colors ── */
+  --text-primary: #F5F0E8;
+  --text-secondary: #A8A095;
+  --text-muted: #6B6359;
+
+  /* ── Spacing Scale ── */
+  --space-2xs: 4px;
+  --space-xs: 8px;
+  --space-sm: 16px;
+  --space-md: 24px;
+  --space-lg: 40px;
+  --space-xl: 64px;
+
+  /* ── Font Stacks ── */
+  --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-serif: 'Crimson Pro', Georgia, serif;
+  --font-mono: 'Space Mono', monospace;
+  --font-diary: 'Playpen Sans', 'Caveat', cursive;
+
+  /* ── Radii ── */
+  --radius-sm: 10px;
+  --radius: 18px;
+  --radius-lg: 24px;
+  --radius-full: 999px;
+
+  /* ── Motion ── */
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --transition: 0.3s var(--ease-bounce);
+  --transition-slow: 0.5s var(--ease-bounce);
+}
+
+
+/* ==========================================================================
+   RESET
+   ========================================================================== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: 15px;
+  background-color: var(--bg-app);
+  color: var(--text-secondary);
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  position: relative;
+}
+
+
+/* ==========================================================================
+   PAPER TEXTURE OVERLAY
+   ========================================================================== */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("../assets/textures/paper_grain.svg");
+  pointer-events: none;
+  z-index: 0;
+}
+
+
+/* ==========================================================================
+   WARM SCROLLBAR
+   ========================================================================== */
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-focus);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+
+/* ==========================================================================
+   TYPOGRAPHY
+   ========================================================================== */
+h1, h2, h3, h4 {
+  color: var(--text-primary);
+  font-family: var(--font-serif);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+strong {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+::selection {
+  background: var(--accent-transparent);
+  color: var(--accent);
+}

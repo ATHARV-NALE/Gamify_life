@@ -1,0 +1,76 @@
+/* ==========================================================================
+   GAMIFY LIFE — ANIMATIONS
+   Keyframes · XP Float · Pulse · FadeUp
+   ========================================================================== */
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 0.4; }
+  50%      { opacity: 1; }
+}
+
+/* XP Float — flies up when you complete a quest */
+.xp-float {
+  position: fixed;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--success);
+  pointer-events: none;
+  z-index: 3000;
+  animation: xpFloat 0.9s var(--ease-bounce) forwards;
+  text-shadow: 0 2px 8px rgba(124, 179, 66, 0.3);
+}
+
+@keyframes xpFloat {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  40% {
+    transform: translateY(-20px) scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-50px) scale(0.8);
+    opacity: 0;
+  }
+}
+
+/* Quest card entrance stagger */
+.quest-card {
+  animation: fadeUp 0.3s var(--ease-smooth) both;
+}
+
+.quest-card:nth-child(1) { animation-delay: 0.05s; }
+.quest-card:nth-child(2) { animation-delay: 0.10s; }
+.quest-card:nth-child(3) { animation-delay: 0.15s; }
+.quest-card:nth-child(4) { animation-delay: 0.20s; }
+.quest-card:nth-child(5) { animation-delay: 0.25s; }
+.quest-card:nth-child(6) { animation-delay: 0.30s; }
+
+/* Chat bubble entrance */
+.chat-bubble-wrap {
+  animation: fadeUp 0.25s var(--ease-smooth);
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

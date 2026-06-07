@@ -1,0 +1,81 @@
+/* ==========================================================================
+   GAMIFY LIFE — GARDEN
+   Canvas container · Overlay · Progress
+   ========================================================================== */
+
+.garden-section {
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: linear-gradient(180deg, var(--surface-inner) 0%, var(--bg-sidebar) 100%);
+  border: 1px solid var(--border);
+  min-height: 220px;
+}
+
+.garden-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.7;
+}
+
+.garden-overlay {
+  position: relative;
+  z-index: 2;
+  padding: var(--space-lg) var(--space-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 220px;
+}
+
+.garden-status {
+  text-align: center;
+}
+
+.garden-stage {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.garden-progress-text {
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  color: var(--text-primary);
+  font-style: italic;
+  margin-bottom: var(--space-xs);
+}
+
+.garden-progress-bar {
+  width: 140px;
+  height: 3px;
+  background: var(--border);
+  border-radius: 10px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+.garden-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-muted), var(--accent));
+  border-radius: 10px;
+  transition: width 0.8s var(--ease-bounce);
+  box-shadow: 0 0 10px var(--accent-glow);
+}
+
+@media (max-width: 480px) {
+  .garden-section {
+    min-height: 180px;
+  }
+
+  .garden-overlay {
+    min-height: 180px;
+    padding: var(--space-md);
+  }
+}
